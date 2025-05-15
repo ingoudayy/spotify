@@ -1,0 +1,39 @@
+﻿name: Build and Publish Blazor
+
+on:
+  push:
+    branches: [ dev ]
+  workflow_dispatch:
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: ✅ Checkout repository
+      uses: actions/checkout@v3
+
+    - name: ✅ Setup .NET SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+
+    - name: ✅ Restore dependencies
+      run: dotnet restore
+
+    - name: ✅ Build the project
+      run: dotnet build --configuration Release --no-restore
+
+    - name: ✅ Publish the app
+      run: dotnet publish --configuration Release --output ./publish --no-build
+
+    - name: ✅ Show published output
+      run: ls -la ./publish
+    - name: ✅ Fix GitHub Pages SPA routing
+      run: cp ./publish/wwwroot/index.html ./publish/wwwroot/404.html
+
+    - name: 🚀 Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.SPOTIFY_TOKEN }}
+        publish_dir: ./publish/wwwroot

@@ -1,0 +1,34 @@
+﻿@using SpotifyTopSongsApp.Services
+@inject SpotifyService SpotifyService
+
+@page "/"
+@inject SpotifyService SpotifyService
+
+<h3>🎵 Top chansons du mois</h3>
+
+@if (tracks == null)
+{
+    <p>Chargement...</p>
+}
+else if (!tracks.Any())
+{
+    <p>Aucune chanson trouvée ce mois.</p>
+}
+else
+{
+    <ul>
+        @foreach (var t in tracks)
+        {
+            <li><b>@t.Title</b> – @t.Artist – 🎧 @t.Popularity – 📅 @t.ReleaseDate</li>
+        }
+    </ul>
+}
+
+@code {
+    private List<(string Title, string Artist, int Popularity, string ReleaseDate)> tracks;
+
+    protected override async Task OnInitializedAsync()
+    {
+        tracks = await SpotifyService.GetTopTracksAsync();
+    }
+}

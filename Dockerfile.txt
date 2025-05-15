@@ -1,0 +1,23 @@
+﻿# Étape 1 : Build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copier tout le projet
+COPY . .
+
+# Restaurer les dépendances
+RUN dotnet restore "SpotifyTopSongsApp.csproj"
+
+# Publier l'application
+RUN dotnet publish "SpotifyTopSongsApp.csproj" -c Release -o /app/publish
+
+# Étape 2 : Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
+COPY --from=build /app/publish .
+
+# Expose le port
+EXPOSE 80
+
+# Lancer l'application
+ENTRYPOINT ["dotnet", "SpotifyTopSongsApp.dll"]
