@@ -6,7 +6,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 
 		<!-- 👉 Ajouts pour GitHub Pages -->
-		<StaticWebAssetBasePath>spotify/</StaticWebAssetBasePath>
+		<StaticWebAssetBasePath>/</StaticWebAssetBasePath>
 		<!-- Remplace "spotify" par le nom de ton dépôt GitHub -->
 		<PublishTrimmed>false</PublishTrimmed>
 	</PropertyGroup>
