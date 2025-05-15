@@ -1,4 +1,4 @@
-name: Deploy Blazor WASM to GitHub Pages
+name: Build and Publish Blazor
 
 on:
   push:
@@ -9,26 +9,38 @@ permissions:
   contents: write
 
 jobs:
-  build-and-deploy:
+  build-and-publish:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: ✅ Checkout repository
       uses: actions/checkout@v3
 
-    - name: Setup .NET SDK
+    - name: ✅ Setup .NET SDK
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 8.0.x
 
-    - name: Publish Blazor WASM app
-      run: dotnet publish -c Release -o release
+    - name: ✅ Restore dependencies
+      run: dotnet restore
 
-    - name: Fix GitHub Pages SPA routing
-      run: cp release/wwwroot/index.html release/wwwroot/404.html
+    - name: ✅ Build the project
+      run: dotnet build --configuration Release --no-restore
 
-    - name: Deploy to GitHub Pages
+    - name: ✅ Publish the app
+      run: dotnet publish --configuration Release -o publish --no-build
+
+    - name: 🔍 List published output
+      run: ls -R ./publish
+
+    - name: ✅ Fix GitHub Pages SPA routing (tolerant)
+      run: |
+        if [ -f ./publish/wwwroot/index.html ]; then
+          cp ./publish/wwwroot/index.html ./publish/wwwroot/404.html
+        fi
+
+    - name: 🚀 Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: release/wwwroot
+        github_token: ${{ secrets.SPOTIFY_TOKEN }}
+        publish_dir: ./publish/wwwroot
