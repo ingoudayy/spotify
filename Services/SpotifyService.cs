@@ -1,4 +1,6 @@
 ﻿using SpotifyAPI.Web;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SpotifyTopSongsApp.Services
 {
@@ -20,53 +22,46 @@ namespace SpotifyTopSongsApp.Services
             _spotify = new SpotifyClient(config.WithToken(token.AccessToken));
         }
 
-        public async Task<List<(string Title, string Artist, int Popularity, string ReleaseDate)>> GetTopTracksAsync()
+        public async Task<List<SpotifyTrack>> SearchTracksAsync(string query)
         {
-            try
+            var searchResults = new List<SpotifyTrack>();
+
+            if (_spotify == null)
+                await InitializeAsync();
+
+            var searchRequest = new SearchRequest(SearchRequest.Types.Track | SearchRequest.Types.Artist, query)
             {
-                if (_spotify == null)
-                    await InitializeAsync();
+                Limit = 10
+            };
 
-                var playlistId = "37i9dQZF1DXcBWIGoYBM5M"; 
-                var page = await _spotify.Playlists.GetItems(playlistId, new PlaylistGetItemsRequest { Limit = 50 });
+            var searchResponse = await _spotify.Search.Item(searchRequest);
 
-                var allTracks = new List<FullTrack>();
-
-                do
+            foreach (var track in searchResponse.Tracks.Items)
+            {
+                searchResults.Add(new SpotifyTrack
                 {
-                    var currentTracks = page.Items
-                        .Where(item => item.Track is FullTrack)
-                        .Select(item => item.Track as FullTrack)
-                        .ToList();
-
-                    allTracks.AddRange(currentTracks);
-
-                    if (page.Next != null)
-                        page = await _spotify.NextPage(page);
-                    else
-                        break;
-
-                } while (page.Items.Count > 0);
-
-                Console.WriteLine($"{allTracks.Count} morceaux extraits de la playlist.");
-
-                var tracks = allTracks
-                    .OrderByDescending(t => t.Popularity)
-                    .Select(track => (
-                        track.Name,
-                        string.Join(", ", track.Artists.Select(a => a.Name)),
-                        track.Popularity,
-                        track.Album.ReleaseDate
-                    ))
-                    .ToList();
-
-                return tracks;
+                    TrackName = track.Name,
+                    ArtistName = track.Artists[0].Name,
+                    SpotifyLink = track.ExternalUrls["spotify"],
+                    ImageUrl = track.Album.Images.Count > 0 ? track.Album.Images[0].Url : string.Empty,
+                    Popularity = track.Popularity,
+                    DurationMs = track.DurationMs
+                });
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($" ERREUR API Spotify : {ex.Message}");
-                return new();
-            }
+
+            return searchResults;
         }
+    }
+
+    public class SpotifyTrack
+    {
+        public string TrackName { get; set; }
+        public string ArtistName { get; set; }
+        public string ImageUrl { get; set; }
+        public string SpotifyLink { get; set; }
+
+        // ✅ Améliorations UX/UI
+        public int Popularity { get; set; }
+        public int DurationMs { get; set; }
     }
 }

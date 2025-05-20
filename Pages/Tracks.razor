@@ -1,0 +1,113 @@
+﻿@page "/tracks"
+@using SpotifyTopSongsApp.Services
+@using Blazored.LocalStorage
+@inject ILocalStorageService LocalStorage
+@inject SpotifyService SpotifyService
+
+<h3 class="mt-3 mb-4"><i class="bi bi-music-note-list"></i> Recherche Spotify</h3>
+
+<div class="input-group mb-3">
+    <input @bind="searchQuery" @bind:event="oninput" class="form-control form-control-lg" placeholder="Recherchez un artiste ou une chanson..." />
+    <button class="btn btn-success" @onclick="Search">🔍 Rechercher</button>
+</div>
+
+@if (searchHistory?.Any() == true)
+{
+    <div class="mb-4">
+        <label><strong>Recherches récentes :</strong></label>
+        <ul class="list-group">
+            @foreach (var q in searchHistory)
+            {
+                <li class="list-group-item list-group-item-action" @onclick="@(() => RechercherDepuisHistorique(q))" style="cursor:pointer;">@q</li>
+            }
+        </ul>
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+else if (isLoading)
+{
+    <div class="text-center mt-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement...</span>
+        </div>
+    </div>
+}
+else if (searchResults == null || !searchResults.Any())
+{
+    <div class="alert alert-warning">Aucun résultat trouvé.</div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (var track in searchResults)
+        {
+            <div class="col">
+                <div class="card h-100 shadow">
+                    <img src="@track.ImageUrl" class="card-img-top" alt="@track.ArtistName" />
+                    <div class="card-body">
+                        <h5 class="card-title">@track.TrackName</h5>
+                        <p class="card-text">Artiste : @track.ArtistName</p>
+                        <a class="btn btn-primary" target="_blank" href="@track.SpotifyLink">🎧 Écouter</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private string searchQuery = string.Empty;
+    private bool isLoading = false;
+    private string errorMessage;
+    private List<string> searchHistory = new();
+    private List<SpotifyTrack> searchResults = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        searchHistory = await LocalStorage.GetItemAsync<List<string>>("searchHistory") ?? new();
+    }
+
+    private async Task Search()
+    {
+        if (string.IsNullOrWhiteSpace(searchQuery))
+            return;
+
+        if (!searchHistory.Contains(searchQuery))
+        {
+            searchHistory.Insert(0, searchQuery);
+            if (searchHistory.Count > 5)
+                searchHistory.RemoveAt(5);
+
+            await LocalStorage.SetItemAsync("searchHistory", searchHistory);
+        }
+
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+
+            searchResults = await SpotifyService.SearchTracksAsync(searchQuery);
+
+            if (!searchResults.Any())
+                errorMessage = "Aucun résultat trouvé.";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Une erreur s'est produite : {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task RechercherDepuisHistorique(string query)
+    {
+        searchQuery = query;
+        await Search();
+    }
+}
