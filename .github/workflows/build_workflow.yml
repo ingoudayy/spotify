@@ -1,4 +1,4 @@
-name: Build and Publish Blazor
+name: Build and Publish Blazor 
 
 on:
   push:
@@ -30,14 +30,13 @@ jobs:
     - name: ✅ Publish the app
       run: dotnet publish --configuration Release -o publish --no-build
 
+    - name: ✅ Set base href for GitHub Pages (/spotify/)
+      run: |
+        sed -i 's|<base href="/" />|<base href="/spotify/" />|' publish/wwwroot/index.html
+        cp publish/wwwroot/index.html publish/wwwroot/404.html
+
     - name: 🔍 List published output
       run: ls -R ./publish
-
-    - name: ✅ Fix GitHub Pages SPA routing (tolerant)
-      run: |
-        if [ -f ./publish/wwwroot/index.html ]; then
-          cp ./publish/wwwroot/index.html ./publish/wwwroot/404.html
-        fi
 
     - name: 🚀 Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3

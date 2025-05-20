@@ -1,15 +1,22 @@
 ﻿@page "/tracks"
 @using SpotifyTopSongsApp.Services
 @using Blazored.LocalStorage
+@using SpotifyTopSongsApp.Models
 @inject ILocalStorageService LocalStorage
 @inject SpotifyService SpotifyService
 
 <h3 class="mt-3 mb-4"><i class="bi bi-music-note-list"></i> Recherche Spotify</h3>
 
 <div class="input-group mb-3">
-    <input @bind="searchQuery" @bind:event="oninput" class="form-control form-control-lg" placeholder="Recherchez un artiste ou une chanson..." />
+    <input @bind="searchQuery" @bind:event="oninput" class="form-control form-control-lg" placeholder="Recherchez un artiste, un album ou un titre..." />
     <button class="btn btn-success" @onclick="Search">🔍 Rechercher</button>
 </div>
+
+<select class="form-select mb-3" @bind="filterType">
+    <option value="track">🎵 Titres</option>
+    <option value="artist">👤 Artistes</option>
+    <option value="album">💿 Albums</option>
+</select>
 
 @if (searchHistory?.Any() == true)
 {
@@ -46,12 +53,17 @@ else
         @foreach (var track in searchResults)
         {
             <div class="col">
-                <div class="card h-100 shadow">
+                <div class="card h-100 shadow border-0">
                     <img src="@track.ImageUrl" class="card-img-top" alt="@track.ArtistName" />
                     <div class="card-body">
                         <h5 class="card-title">@track.TrackName</h5>
-                        <p class="card-text">Artiste : @track.ArtistName</p>
-                        <a class="btn btn-primary" target="_blank" href="@track.SpotifyLink">🎧 Écouter</a>
+                        <p class="card-text mb-1">🎤 @track.ArtistName</p>
+                        <p class="card-text small">
+                            🔥 Popularité : <span class="badge bg-info">@track.Popularity</span><br />
+                            ⏱️ Durée : @TimeSpan.FromMilliseconds(track.DurationMs).ToString(@"m\:ss")
+                        </p>
+                        <a class="btn btn-primary w-100" target="_blank" href="@track.SpotifyLink">🎧 Écouter</a>
+                        <button class="btn btn-outline-warning mt-2 w-100" @onclick="() => AddToFavorites(track)">⭐ Ajouter aux favoris</button>
                     </div>
                 </div>
             </div>
@@ -61,6 +73,7 @@ else
 
 @code {
     private string searchQuery = string.Empty;
+    private string filterType = "track";
     private bool isLoading = false;
     private string errorMessage;
     private List<string> searchHistory = new();
@@ -90,7 +103,7 @@ else
             isLoading = true;
             errorMessage = null;
 
-            searchResults = await SpotifyService.SearchTracksAsync(searchQuery);
+            searchResults = await SpotifyService.SearchTracksAsync(searchQuery, filterType);
 
             if (!searchResults.Any())
                 errorMessage = "Aucun résultat trouvé.";
@@ -102,6 +115,16 @@ else
         finally
         {
             isLoading = false;
+        }
+    }
+
+    private async Task AddToFavorites(SpotifyTrack track)
+    {
+        var list = await LocalStorage.GetItemAsync<List<SpotifyTrack>>("favorites") ?? new();
+        if (!list.Any(f => f.TrackName == track.TrackName && f.ArtistName == track.ArtistName))
+        {
+            list.Add(track);
+            await LocalStorage.SetItemAsync("favorites", list);
         }
     }
 

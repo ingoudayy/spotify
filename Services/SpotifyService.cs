@@ -1,6 +1,7 @@
 ﻿using SpotifyAPI.Web;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SpotifyTopSongsApp.Models;
 
 namespace SpotifyTopSongsApp.Services
 {
@@ -22,14 +23,21 @@ namespace SpotifyTopSongsApp.Services
             _spotify = new SpotifyClient(config.WithToken(token.AccessToken));
         }
 
-        public async Task<List<SpotifyTrack>> SearchTracksAsync(string query)
+        public async Task<List<SpotifyTrack>> SearchTracksAsync(string query, string filterType = "track")
         {
             var searchResults = new List<SpotifyTrack>();
 
             if (_spotify == null)
                 await InitializeAsync();
 
-            var searchRequest = new SearchRequest(SearchRequest.Types.Track | SearchRequest.Types.Artist, query)
+            var type = filterType switch
+            {
+                "artist" => SearchRequest.Types.Artist,
+                "album" => SearchRequest.Types.Album,
+                _ => SearchRequest.Types.Track
+            };
+
+            var searchRequest = new SearchRequest(type, query)
             {
                 Limit = 10
             };
@@ -51,17 +59,6 @@ namespace SpotifyTopSongsApp.Services
 
             return searchResults;
         }
-    }
 
-    public class SpotifyTrack
-    {
-        public string TrackName { get; set; }
-        public string ArtistName { get; set; }
-        public string ImageUrl { get; set; }
-        public string SpotifyLink { get; set; }
-
-        // ✅ Améliorations UX/UI
-        public int Popularity { get; set; }
-        public int DurationMs { get; set; }
     }
 }
