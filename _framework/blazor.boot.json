@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "SpotifyTopSongsApp",
   "resources": {
-    "hash": "sha256-vp/1rcls09mWGtLQQkL+kpXRYJIBKKb9zDnVPzmsMYg=",
+    "hash": "sha256-Emc+hkfIXkEhwUE9OSpvs9Kf0a3/YYqmPsTtKShjmZY=",
     "jsModuleNative": {
       "dotnet.native.8.0.16.khcj4p6y0x.js": "sha256-RiGT44TFZmHOY+Oqvb8o8r+BJVWex6+dPxFxrOiWvFY="
     },
@@ -56,7 +56,7 @@
       "netstandard.wasm": "sha256-PK0GLtj6kQVtZPzq0FZlnSdHh7geujg80LqKdJXA4pI=",
       "Newtonsoft.Json.wasm": "sha256-GlXMWKvDs45M2pACoR3Y4Qh8mcrOZGljqmvJY+6JZ5s=",
       "SpotifyAPI.Web.wasm": "sha256-f0bvMefyX47jOehl9H9hGwtvB8g91B8tP//cJyLX71o=",
-      "SpotifyTopSongsApp.wasm": "sha256-Q+l6up9pKQuZO4b5D7iTy0uH3XeQarR7mmsQHoXP//0=",
+      "SpotifyTopSongsApp.wasm": "sha256-4yggO+37mZEw46Z5dIsZ0OI3IfDjNPXkZQpHqONH2tw=",
       "System.AppContext.wasm": "sha256-YKWR4jo8c2tltilYPzj5Ju0fxwDp/iyc+t3HJfhc+Rg=",
       "System.Buffers.wasm": "sha256-6sGQa8e3BCDjsuqqoSM7b8s1fXREetyRusLQwPCJ8wY=",
       "System.Collections.Concurrent.wasm": "sha256-Wh0YruBBuBX2fGThFMPW7ruI5lHweaX3s3lF+X5sH2A=",
