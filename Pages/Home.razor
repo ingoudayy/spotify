@@ -5,65 +5,69 @@
 @inject SpotifyService SpotifyService
 @inject IJSRuntime JS
 
-<h1 class="text-center mt-5 text-primary">
-    🎉 Bienvenue sur <strong>Music World</strong>
-</h1>
-<p class="text-center text-muted mb-5">
-    Explorez vos musiques préférées et découvrez de nouveaux sons chaque jour 🎧
-</p>
+<div class="container">
 
-<div class="text-center mb-4">
-    <button class="btn btn-theme-toggle" @onclick="ToggleTheme">
-        @(isDarkMode ? "Thème clair" : " Thème sombre")
-    </button>
+    <h1 class="text-center mt-5 text-primary">
+        🎉 Bienvenue sur <strong>Music World</strong>
+    </h1>
+    <p class="text-center text-muted mb-5">
+        Explorez vos musiques préférées et découvrez de nouveaux sons chaque jour 🎧
+    </p>
+
+    <div class="text-center mb-4">
+        <button class="btn btn-outline-secondary px-4" @onclick="ToggleTheme">
+            @(isDarkMode ? "☀️ Thème clair" : "🌙 Thème sombre")
+        </button>
+    </div>
+
+    <h2 class="mt-5 mb-3">🔥 Top chansons de la semaine</h2>
+    @if (topTracks == null || topTracks.Count == 0)
+    {
+        <p>Chargement des tops chansons...</p>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            @foreach (var track in topTracks)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <img src="@track.ImageUrl" class="card-img-top img-fluid" alt="@track.TrackName" />
+                        <div class="card-body">
+                            <h5 class="card-title">@track.TrackName</h5>
+                            <p class="card-text">🎤 @track.ArtistName</p>
+                            <a class="btn btn-success w-100" target="_blank" href="@track.SpotifyLink">🎧 Écouter</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <h2 class="mt-5 mb-3">⭐ Top artistes du moment</h2>
+    @if (topArtists == null || topArtists.Count == 0)
+    {
+        <p>Chargement des artistes...</p>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            @foreach (var artist in topArtists)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <img src="@artist.ImageUrl" class="card-img-top img-fluid" alt="@artist.Name" />
+                        <div class="card-body">
+                            <h5 class="card-title">@artist.Name</h5>
+                            <a class="btn btn-outline-warning w-100" target="_blank" href="@artist.SpotifyLink">🔗 Voir le profil</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
 </div>
-
-<h2 class="mt-5 mb-3">🔥 Top chansons de la semaine</h2>
-@if (topTracks == null || topTracks.Count == 0)
-{
-    <p>Chargement des tops chansons...</p>
-}
-else
-{
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        @foreach (var track in topTracks)
-        {
-            <div class="col">
-                <div class="card h-100 shadow-sm">
-                    <img src="@track.ImageUrl" class="card-img-top" />
-                    <div class="card-body">
-                        <h5 class="card-title">@track.TrackName</h5>
-                        <p class="card-text">🎤 @track.ArtistName</p>
-                        <a class="btn btn-success w-100" target="_blank" href="@track.SpotifyLink">🎧 Écouter</a>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-}
-
-<h2 class="mt-5 mb-3"> Top artistes du moment</h2>
-@if (topArtists == null || topArtists.Count == 0)
-{
-    <p>Chargement des artistes...</p>
-}
-else
-{
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        @foreach (var artist in topArtists)
-        {
-            <div class="col">
-                <div class="card h-100 shadow-sm">
-                    <img src="@artist.ImageUrl" class="card-img-top" />
-                    <div class="card-body">
-                        <h5 class="card-title">@artist.Name</h5>
-                        <a class="btn btn-outline-warning w-100" target="_blank" href="@artist.SpotifyLink">🔗 Voir le profil</a>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-}
 
 @code {
     private List<SpotifyTrack> topTracks = new();
