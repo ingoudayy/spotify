@@ -1,0 +1,35 @@
+﻿@page "/youtube"
+@inject YouTubeService YouTubeService
+
+<h3 class="mb-3">🎬 Résultats YouTube</h3>
+
+<input class="form-control mb-3" @bind="query" placeholder="Rechercher une chanson sur YouTube" />
+<button class="btn btn-primary mb-4" @onclick="SearchYouTube">🔍 Chercher</button>
+
+@if (videoIds.Count > 0)
+{
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        @foreach (var videoId in videoIds)
+        {
+            <div class="col">
+                <div class="card shadow-sm">
+                    <iframe class="card-img-top" width="100%" height="250"
+                            src="https://www.youtube.com/embed/@videoId"
+                            frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private string query = "";
+    private List<string> videoIds = new();
+
+    private async Task SearchYouTube()
+    {
+        videoIds = await YouTubeService.SearchVideoIdsAsync(query);
+    }
+}

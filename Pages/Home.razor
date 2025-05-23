@@ -4,6 +4,7 @@
 @using SpotifyTopSongsApp.Models
 @inject SpotifyService SpotifyService
 @inject IJSRuntime JS
+@inject YouTubeService YouTubeService
 
 <div class="container">
 
@@ -36,8 +37,15 @@
                         <div class="card-body">
                             <h5 class="card-title">@track.TrackName</h5>
                             <p class="card-text">🎤 @track.ArtistName</p>
-                            <a class="btn btn-success w-100" target="_blank" href="@track.SpotifyLink">🎧 Écouter</a>
+
+                            <iframe src="https://open.spotify.com/embed/track/@GetSpotifyIdFromUrl(track.SpotifyLink)"
+                                    width="100%" height="80"
+                                    frameborder="0"
+                                    allowtransparency="true"
+                                    allow="encrypted-media">
+                            </iframe>
                         </div>
+
                     </div>
                 </div>
             }
@@ -66,6 +74,32 @@
             }
         </div>
     }
+    <h2 class="mt-5 mb-3">🎬 Rechercher des clips YouTube</h2>
+
+    <div class="mb-4">
+        <input class="form-control mb-2" @bind="youtubeQuery" placeholder="Entrez un artiste ou un titre..." />
+        <button class="btn btn-outline-primary mt-2" @onclick="SearchYouTube">🔍 Rechercher sur YouTube</button>
+    </div>
+
+    @if (youtubeVideoIds?.Count > 0)
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var videoId in youtubeVideoIds)
+            {
+                <div class="col">
+                    <div class="card shadow-sm">
+                        <iframe class="card-img-top" width="100%" height="250"
+                                src="https://www.youtube.com/embed/@videoId"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
 
 </div>
 
@@ -97,4 +131,22 @@
         await JS.InvokeVoidAsync("document.body.classList.remove", isDarkMode ? "light-theme" : "dark-theme");
         await JS.InvokeVoidAsync("document.body.classList.add", themeClass);
     }
+    private string GetSpotifyIdFromUrl(string url)
+    {
+        if (string.IsNullOrEmpty(url)) return "";
+        var parts = url.Split('/');
+        return parts.LastOrDefault();
+    }
+    private string youtubeQuery = string.Empty;
+    private List<string> youtubeVideoIds = new();
+
+    private async Task SearchYouTube()
+    {
+        if (!string.IsNullOrWhiteSpace(youtubeQuery))
+        {
+            youtubeVideoIds = await YouTubeService.SearchVideoIdsAsync(youtubeQuery, 6);
+        }
+    }
+
+
 }
