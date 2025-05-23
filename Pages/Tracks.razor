@@ -22,6 +22,11 @@
 {
     <div class="mb-4">
         <label><strong>Recherches récentes :</strong></label>
+
+        <button class="btn btn-danger btn-sm ms-2 mb-2" @onclick="ClearHistory">
+            🧹 Effacer l'historique
+        </button>
+
         <ul class="list-group">
             @foreach (var q in searchHistory)
             {
@@ -120,11 +125,20 @@ else
 
     private async Task AddToFavorites(SpotifyTrack track)
     {
-        var list = await LocalStorage.GetItemAsync<List<SpotifyTrack>>("favorites") ?? new();
-        if (!list.Any(f => f.TrackName == track.TrackName && f.ArtistName == track.ArtistName))
+        var favorites = await LocalStorage.GetItemAsync<List<SpotifyTrack>>("favorites") ?? new();
+
+        if (!favorites.Any(f =>
+            f.TrackName == track.TrackName &&
+            f.ArtistName == track.ArtistName &&
+            f.SpotifyLink == track.SpotifyLink))
         {
-            list.Add(track);
-            await LocalStorage.SetItemAsync("favorites", list);
+            favorites.Add(track);
+            await LocalStorage.SetItemAsync("favorites", favorites);
+            Console.WriteLine($"[DEBUG] Ajouté aux favoris : {track.TrackName}");
+        }
+        else
+        {
+            Console.WriteLine($"[DEBUG] Déjà dans les favoris : {track.TrackName}");
         }
     }
 
@@ -132,5 +146,11 @@ else
     {
         searchQuery = query;
         await Search();
+    }
+
+    private async Task ClearHistory()
+    {
+        searchHistory.Clear();
+        await LocalStorage.RemoveItemAsync("searchHistory");
     }
 }

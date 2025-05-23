@@ -1,33 +1,80 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using Microsoft.JSInterop
+
+<div class="top-row ps-3 navbar navbar-dark bg-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">SpotifyTopSongsApp</a>
+        <a class="navbar-brand" href="">🎧 SpotifyTopSongsApp</a>
+
+        <!-- Switch Thème Clair/Sombre -->
+        <button class="btn btn-outline-light me-3" @onclick="ToggleTheme">
+            @if (isDarkMode)
+            {
+                <span>☀️ Mode clair</span>
+            }
+            else
+            {
+                <span>🌙 Mode sombre</span>
+            }
+        </button>
+
+        <!-- Bouton menu burger (mobile) -->
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
     </div>
 </div>
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+
+<div class="@NavMenuCssClass nav-scrollable bg-light shadow-sm">
     <nav class="flex-column">
-        <div class="nav-item px-3">
+        <div class="nav-item px-3 py-2">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                <i class="bi bi-house-door-fill me-2"></i> Accueil
             </NavLink>
         </div>
-        <div class="nav-item px-3">
+        <div class="nav-item px-3 py-2">
             <NavLink class="nav-link" href="tracks">
-                <span class="bi bi-music-note-list" aria-hidden="true"></span> Tracks
+                <i class="bi bi-music-note-list me-2"></i> Rechercher des morceaux
+            </NavLink>
+        </div>
+        <div class="nav-item px-3 py-2">
+            <NavLink class="nav-link" href="favorites">
+                <i class="bi bi-star-fill me-2 text-warning"></i> Mes Favoris
             </NavLink>
         </div>
     </nav>
 </div>
 
 @code {
-    private bool collapseNavMenu = true;
+    [Inject] private IJSRuntime JS { get; set; } = default!;
 
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    private bool collapseNavMenu = true;
+    private string? NavMenuCssClass => collapseNavMenu ? null : "collapse";
 
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    // 🌙 Thème clair/sombre
+    private bool isDarkMode = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var savedTheme = await JS.InvokeAsync<string>("localStorage.getItem", "theme");
+        isDarkMode = savedTheme == "dark";
+        await ApplyTheme();
+    }
+
+    private async Task ToggleTheme()
+    {
+        isDarkMode = !isDarkMode;
+        await JS.InvokeVoidAsync("localStorage.setItem", "theme", isDarkMode ? "dark" : "light");
+        await ApplyTheme();
+    }
+
+    private async Task ApplyTheme()
+    {
+        var themeClass = isDarkMode ? "dark-theme" : "light-theme";
+        await JS.InvokeVoidAsync("document.body.classList.remove", isDarkMode ? "light-theme" : "dark-theme");
+        await JS.InvokeVoidAsync("document.body.classList.add", themeClass);
     }
 }

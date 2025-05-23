@@ -8,5 +8,9 @@
         public string SpotifyLink { get; set; }
         public int Popularity { get; set; }
         public int DurationMs { get; set; }
+        public string AudioUrl { get; set; }
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public SpotifyTrack() { } 
     }
 }
